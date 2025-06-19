@@ -13,6 +13,7 @@ public:
     static vector<char> get_conjunto_ids(Grafo* grafo, int tam);
     static bool pergunta_imprimir_arquivo(string nome_arquivo);
 private:
+    // Criei esta para imprimir a lista de fechos. Ainda falta colocar uma para imprimir no formato de grafo, seja baseando-se num grafo todo ou num grafo e numa lista dessas:
     static void imprimirConjuntoChar(vector<char> conjunto);    
 };
 

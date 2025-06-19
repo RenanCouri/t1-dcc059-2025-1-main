@@ -32,6 +32,8 @@ Grafo::~Grafo() {
         delete transposto;
 }
 
+
+// Criados:
 bool Grafo::ehUmNovoNo(char id){
     return posicaoNoNaLista(id)==-1;
 }
@@ -96,7 +98,7 @@ bool Grafo::inserirAresta(char id_org,char id_dest,int pesoArst){
 }
 
 
-void Grafo::gerarTransposto(){
+void Grafo::gerarTransposto(){ // Gera grafo transposto para fazer fecho transitivo indireto
     if(!transposto_valido && in_direcionado){
         if(transposto!=NULL)
             delete transposto;
@@ -132,7 +134,7 @@ void Grafo::auxiliarFechos(char id_no,vector<char>& lista_fecho){
     }
 }
 
-
+// Fim das que criei, a partir daqui são as funções que já exisitiam. Implementei as de fecho transitivo direto e indireto:
 vector<char> Grafo::fecho_transitivo_direto(char id_no) {
     
     if(!in_direcionado){
@@ -163,6 +165,8 @@ vector<char> Grafo::fecho_transitivo_indireto(char id_no) {
     return retorno;
 }
 
+
+// A partir daqui, ainda devemos implementar:
 vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b) {
     cout<<"Metodo nao implementado"<<endl;
     return {};

@@ -3,6 +3,7 @@
 
 using namespace std;
 
+// Função que criei:
 void Gerenciador::imprimirConjuntoChar(vector<char> conjunto){
     cout<<"{ ";
             bool primeiro=true;
@@ -38,10 +39,10 @@ void Gerenciador::comandos(Grafo* grafo) {
             char id_no = get_id_entrada();
             vector<char> fecho_transitivo_direto = grafo->fecho_transitivo_direto(id_no);
            
-            cout<<endl<<endl<<"Lista: "<<endl;
+            cout<<endl<<endl<<"Lista em formato de conjunto: "<<endl;
             imprimirConjuntoChar(fecho_transitivo_direto);
             cout<<endl<<endl;
-
+            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
             if(pergunta_imprimir_arquivo("fecho_trans_dir.txt")) {
                 cout<<"Metodo de impressao em arquivo nao implementado"<<endl<<endl;
             }
@@ -54,10 +55,10 @@ void Gerenciador::comandos(Grafo* grafo) {
 
             char id_no = get_id_entrada();
             vector<char> fecho_transitivo_indireto = grafo->fecho_transitivo_indireto(id_no);
-            cout<<endl<<endl<<"Lista: "<<endl;
+            cout<<endl<<endl<<"Lista em formato de conjunto: "<<endl;
             imprimirConjuntoChar(fecho_transitivo_indireto);
             cout<<endl<<endl;
-
+            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
             if(pergunta_imprimir_arquivo("fecho_trans_indir.txt")) {
                 cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
             }

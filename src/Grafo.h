@@ -15,6 +15,7 @@ class Grafo {
 public:
     Grafo();
     ~Grafo();
+    //Criei este construtor:
     Grafo(bool direcionado,bool ponderadoVertice,bool ponderadoAresta);
 
     vector<char> fecho_transitivo_direto(char id_no); // a
@@ -29,6 +30,8 @@ public:
     vector<char> centro(); // h 3
     vector<char> periferia(); // h 4
     vector<char> vertices_de_articulacao(); // i
+
+    // Criei estas:
     bool ehUmNovoNo(char id);
     No* encontrarNo(char id);
     bool inserirNo(char id, int pesoNo);
@@ -42,6 +45,8 @@ public:
     bool in_ponderado_aresta;
     bool in_ponderado_vertice;
     vector<No*> lista_adj;
+
+    //Criei Estes:
     bool ha_peso_negativo;
     
     bool transposto_valido=false;
