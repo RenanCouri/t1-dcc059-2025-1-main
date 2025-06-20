@@ -11,6 +11,13 @@
 #include <algorithm>
 
 using namespace std;
+
+struct ArestaCompleta {
+    char origem;
+    char destino;
+    int peso;
+};
+
 class Grafo {
 public:
     Grafo();
@@ -39,6 +46,7 @@ public:
     int posicaoNoNaLista(char id);
     void gerarTransposto();
     bool inserirArestaRetorno(char id_org,char id_dest,int pesoArst);
+    Grafo* subGrafoVerticeInduzido(vector<char> ids_nos);
 
     int ordem;
     bool in_direcionado;
@@ -55,8 +63,10 @@ public:
 
 
 private:
+    
+
     void auxiliarFechos(char id_no,vector<char>& lista_fecho); 
-    void procedimentoBuscaProfundidade(bool* visitado,Grafo* arv_profundidade);
+    static vector<ArestaCompleta> listaArestasOrdenadas(Grafo* grafo);
     void buscaProfundidadeNo(Grafo* prof,No* no,bool*visitado,char id_pai);
 
 };

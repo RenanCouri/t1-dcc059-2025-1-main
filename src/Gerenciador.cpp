@@ -211,8 +211,9 @@ void Gerenciador::comandos(Grafo* grafo) {
             if(tam > 0 && tam <= grafo->ordem) {
 
                 vector<char> ids = get_conjunto_ids(grafo,tam);
+                Grafo* subGrafoVI=grafo->subGrafoVerticeInduzido(ids);
                 Grafo* arvore_geradora_minima_kruskal = grafo->arvore_geradora_minima_kruskal(ids);
-                cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
+                imprimirGrafo(subGrafoVI);
 
                 if(pergunta_imprimir_arquivo("agm_kruskal.txt")) {
                     cout<<"Metodo de impressao em arquivo nao implementado"<<endl;

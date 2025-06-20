@@ -180,14 +180,167 @@ vector<char> Grafo::caminho_minimo_floyd(char id_no, char id_no_b) {
     return {};
 }
 
-Grafo * Grafo::arvore_geradora_minima_prim(vector<char> ids_nos) {
-    cout<<"Metodo nao implementado"<<endl;
-    return nullptr;
+Grafo* Grafo::subGrafoVerticeInduzido(vector<char> ids_nos){
+    int ordemSubGrafo=ids_nos.size();
+    vector<char> utilizados(ordemSubGrafo);
+    Grafo* subGrafo = new Grafo(this->in_direcionado,this->in_ponderado_vertice,this->in_ponderado_aresta);
+    for(No* no : lista_adj){
+        auto iterador=std::find(ids_nos.begin(), ids_nos.end(), no->id);
+        if(iterador != ids_nos.end()){
+            No* novoNo = new No(no->id);
+            novoNo->peso=no->peso;
+            if (iterador != ids_nos.end() - 1)
+                std::iter_swap(iterador, ids_nos.end() - 1);
+            ids_nos.pop_back();
+            utilizados.push_back(no->id);
+            for(Aresta* aresta : no->arestas){
+                iterador=std::find(ids_nos.begin(), ids_nos.end(), aresta->id_no_alvo);
+                if(iterador!=ids_nos.end()){
+                    Aresta* novaAresta= new Aresta(aresta->id_no_alvo);
+                    novaAresta->peso=aresta->peso;
+                    novoNo->arestas.push_back(novaAresta);
+                    
+                }
+                else if(!this->in_direcionado && std::find(utilizados.begin(), utilizados.end(), aresta->id_no_alvo)!=utilizados.end()){
+                    Aresta* novaAresta= new Aresta(aresta->id_no_alvo);
+                    novaAresta->peso=aresta->peso;
+                    novoNo->arestas.push_back(novaAresta);
+                }
+            }
+            
+            subGrafo->lista_adj.push_back(novoNo);
+            
+        }
+        
+    }
+    subGrafo->ordem=ordemSubGrafo;
+    return subGrafo;
 }
 
+
+
+std::vector<ArestaCompleta> Grafo::listaArestasOrdenadas(Grafo* grafo) {
+    std::vector<ArestaCompleta> arestasOrdenadas;
+
+    for (No* no : grafo->lista_adj) {
+        char idOrigem = no->id;
+
+        for (Aresta* aresta : no->arestas) {
+            char idDestino = aresta->id_no_alvo;
+
+            // Se for grafo direcionado, inclui direto;
+            // Se for não-direcionado, inclui apenas uma vez (origem <= destino evita duplicatas)
+            if (grafo->in_direcionado || idOrigem <= idDestino) {
+                ArestaCompleta nova;
+                nova.origem = idOrigem;
+                nova.destino = idDestino;
+                nova.peso = aresta->peso;
+                arestasOrdenadas.push_back(nova);
+            }
+        }
+    }
+
+    std::sort(arestasOrdenadas.begin(), arestasOrdenadas.end(), [](ArestaCompleta a, ArestaCompleta b) {
+        return a.peso > b.peso;  // ordena em ordem decrescente
+    });
+
+    return arestasOrdenadas;
+}
+
+Grafo * Grafo::arvore_geradora_minima_prim(vector<char> ids_nos) {
+   return nullptr;
+}   
+
 Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
-    cout<<"Metodo nao implementado"<<endl;
-    return nullptr;
+    
+    Grafo * subGrafoVertInd= this->subGrafoVerticeInduzido(ids_nos);
+    Grafo * arvoreGeradoraMin= new Grafo(this->in_direcionado,this->in_ponderado_vertice,this->in_ponderado_aresta);
+    vector<ArestaCompleta> listaArestasOrdenad=listaArestasOrdenadas(subGrafoVertInd);
+    vector<vector<char>> nosJuntos;
+
+
+    for(No* no:subGrafoVertInd->lista_adj){
+        No* novoNo= new No(no->id);
+        novoNo->peso=no->peso;
+        arvoreGeradoraMin->lista_adj.push_back(novoNo);
+    }
+    arvoreGeradoraMin->ordem=subGrafoVertInd->ordem;
+    int contador=0;
+    while(contador<subGrafoVertInd->ordem-1 && !listaArestasOrdenad.empty()){
+        
+        ArestaCompleta ar= listaArestasOrdenad.back();
+
+        cout<<"K"<<ar.origem<<" "<<ar.destino<<endl;
+        listaArestasOrdenad.pop_back();
+        bool achou1=false;
+        bool achou2NaMesma=false;
+        bool terminar=false;
+        int pos1=-1;
+        int pos2=-1;
+        int contadorLocalNos=0;
+        char naoAchado='\0';
+        for(vector<char> nos : nosJuntos){
+            for(char id : nos){
+                cout<<id<<endl;
+                if(id==ar.origem || id==ar.destino){
+                    if(achou1){
+                        achou2NaMesma=true;
+                        terminar=true;
+                        break;
+                    }
+                    achou1=true;    
+                    if(pos1==-1){
+                        pos1=contadorLocalNos;
+                        if(ar.origem==id)
+                            naoAchado=ar.destino;
+                        else
+                            naoAchado=ar.origem;    
+                    }    
+                    else{
+                        pos2=contadorLocalNos;  
+                        terminar=true;
+                        break;
+                    }      
+                }
+
+            }
+            contadorLocalNos++;
+            
+            if(terminar)
+                break;
+            achou1=false;    
+                
+        }
+        if(!achou2NaMesma){
+            arvoreGeradoraMin->inserirAresta(ar.origem,ar.destino,ar.peso);
+            cout<<"R"<<ar.origem<<" "<<ar.destino<<endl;
+            contador++;
+            if(pos1==-1){
+                vector<char> novoConj;
+                novoConj.push_back(ar.origem);
+                novoConj.push_back(ar.destino);
+                nosJuntos.push_back(novoConj);
+            }
+            else{
+                if(pos2==-1)
+                    (nosJuntos[pos1]).push_back(naoAchado);
+                else{
+                    vector<char> *juncaoExcluidaParaFusao=&nosJuntos[pos2]; 
+                    vector<char> *fusaoNosJuntos= &nosJuntos[pos1];
+                    for(char no: *juncaoExcluidaParaFusao)
+                        fusaoNosJuntos->push_back(no);
+                    nosJuntos.erase(nosJuntos.begin()+pos2);   
+                }    
+            }
+        }
+        
+    }
+
+    if(nosJuntos.size()!=1){
+        cout<<endl<<"Não foi gerada árvore geradora mínima, pois o grafo não era conexo. Assim é retornado um grafo com árvores geradoras"<<endl;
+    }
+    delete subGrafoVertInd;
+    return arvoreGeradoraMin;
 }
 
 void Grafo::buscaProfundidadeNo(Grafo* prof, No* no,bool* visitado,char id_pai){
