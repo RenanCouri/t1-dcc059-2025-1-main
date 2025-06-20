@@ -269,8 +269,6 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
     while(contador<subGrafoVertInd->ordem-1 && !listaArestasOrdenad.empty()){
         
         ArestaCompleta ar= listaArestasOrdenad.back();
-
-        cout<<"K"<<ar.origem<<" "<<ar.destino<<endl;
         listaArestasOrdenad.pop_back();
         bool achou1=false;
         bool achou2NaMesma=false;
@@ -281,7 +279,6 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
         char naoAchado='\0';
         for(vector<char> nos : nosJuntos){
             for(char id : nos){
-                cout<<id<<endl;
                 if(id==ar.origem || id==ar.destino){
                     if(achou1){
                         achou2NaMesma=true;
@@ -313,7 +310,6 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
         }
         if(!achou2NaMesma){
             arvoreGeradoraMin->inserirAresta(ar.origem,ar.destino,ar.peso);
-            cout<<"R"<<ar.origem<<" "<<ar.destino<<endl;
             contador++;
             if(pos1==-1){
                 vector<char> novoConj;
