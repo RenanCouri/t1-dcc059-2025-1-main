@@ -18,6 +18,41 @@ void Gerenciador::imprimirConjuntoChar(vector<char> conjunto){
             cout<<"}";
 }
 
+void Gerenciador::imprimirGrafoPorIndices(Grafo* grafo,vector<char>& conjunto){
+    cout<<endl;
+    cout<<grafo->in_direcionado<<" "<<grafo->in_ponderado_aresta<<" "<<grafo->in_ponderado_vertice<<endl;
+    vector<vector<Aresta*>> listasArestasInclusas;
+    vector<char> inclusos;
+    for(char indice_no : conjunto){  
+        vector<Aresta*> arestas_inclusas;
+        cout<<indice_no;
+        inclusos.push_back(indice_no);
+        No* no=grafo->encontrarNo(indice_no);
+        if(grafo->in_ponderado_vertice)
+            cout<<" "<<no->peso;
+        for(Aresta* aresta : no->arestas){
+            if(find(conjunto.begin(), conjunto.end(),aresta->id_no_alvo) != conjunto.end() && 
+            (grafo->in_direcionado || find(inclusos.begin(), inclusos.end(),aresta->id_no_alvo)== inclusos.end()  ) )
+                arestas_inclusas.push_back(aresta);
+            
+
+        }
+        listasArestasInclusas.push_back(arestas_inclusas); 
+        cout<<endl;   
+    } 
+    int i=0;
+    for(char indice_no : conjunto){
+        
+        for(Aresta* aresta : listasArestasInclusas[i]){
+            cout<<indice_no<<" "<<aresta->id_no_alvo;
+            if(grafo->in_ponderado_aresta)
+                cout<<" "<<aresta->peso;
+            cout<<endl;    
+        }
+        i++;
+    } 
+
+}  
 
 void Gerenciador::comandos(Grafo* grafo) {
     cout<<"Digite uma das opcoes abaixo e pressione enter:"<<endl<<endl;
@@ -42,7 +77,7 @@ void Gerenciador::comandos(Grafo* grafo) {
             cout<<endl<<endl<<"Lista em formato de conjunto: "<<endl;
             imprimirConjuntoChar(fecho_transitivo_direto);
             cout<<endl<<endl;
-            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
+            imprimirGrafoPorIndices(grafo,fecho_transitivo_direto);
             if(pergunta_imprimir_arquivo("fecho_trans_dir.txt")) {
                 cout<<"Metodo de impressao em arquivo nao implementado"<<endl<<endl;
             }
@@ -58,7 +93,7 @@ void Gerenciador::comandos(Grafo* grafo) {
             cout<<endl<<endl<<"Lista em formato de conjunto: "<<endl;
             imprimirConjuntoChar(fecho_transitivo_indireto);
             cout<<endl<<endl;
-            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
+            imprimirGrafoPorIndices(grafo,fecho_transitivo_indireto);
             if(pergunta_imprimir_arquivo("fecho_trans_indir.txt")) {
                 cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
             }
