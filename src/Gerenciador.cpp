@@ -26,7 +26,7 @@ void Gerenciador::imprimirGrafoPorIndices(Grafo* grafo,vector<char>& conjunto){
     for(char indice_no : conjunto){  
         vector<Aresta*> arestas_inclusas;
         cout<<indice_no;
-        inclusos.push_back(indice_no);
+        
         No* no=grafo->encontrarNo(indice_no);
         if(grafo->in_ponderado_vertice)
             cout<<" "<<no->peso;
@@ -38,6 +38,7 @@ void Gerenciador::imprimirGrafoPorIndices(Grafo* grafo,vector<char>& conjunto){
 
         }
         listasArestasInclusas.push_back(arestas_inclusas); 
+        inclusos.push_back(indice_no);
         cout<<endl;   
     } 
     int i=0;
@@ -51,8 +52,53 @@ void Gerenciador::imprimirGrafoPorIndices(Grafo* grafo,vector<char>& conjunto){
         }
         i++;
     } 
+    cout<<endl;
 
 }  
+
+void Gerenciador::imprimirGrafo(Grafo* grafo){
+    cout<<endl;
+    cout<<grafo->in_direcionado<<" "<<grafo->in_ponderado_aresta<<" "<<grafo->in_ponderado_vertice<<endl;
+    vector<char> inclusos;
+    for(No* no: grafo->lista_adj)
+    {
+        cout<<no->id;
+        if(grafo->in_ponderado_vertice)
+            cout<<" "<<no->peso;
+
+        cout<<endl;    
+    }  
+    for(No* no: grafo->lista_adj)
+    {
+        for(Aresta* aresta: no->arestas){
+            if(grafo->in_direcionado || find(inclusos.begin(), inclusos.end(),aresta->id_no_alvo)== inclusos.end()){
+                cout<<no->id<<" "<<aresta->id_no_alvo;
+                if(grafo->in_ponderado_aresta)
+                    cout<<" "<<aresta->peso;
+                cout<<endl;    
+            }    
+        }
+        if(!grafo->in_direcionado)
+            inclusos.push_back(no->id);
+    }
+    inclusos.clear();
+    cout<<endl<<"Arestas de retorno:"<<endl;
+    for(No* no: grafo->lista_adj_retorno)
+    {
+        for(Aresta* aresta: no->arestas){
+            if(grafo->in_direcionado || find(inclusos.begin(), inclusos.end(),aresta->id_no_alvo)== inclusos.end()){
+                cout<<no->id<<" "<<aresta->id_no_alvo;
+                if(grafo->in_ponderado_aresta)
+                    cout<<" "<<aresta->peso;
+                cout<<endl;    
+            }    
+        }
+        if(!grafo->in_direcionado)
+            inclusos.push_back(no->id);
+    }
+
+    cout<<endl;
+}
 
 void Gerenciador::comandos(Grafo* grafo) {
     cout<<"Digite uma das opcoes abaixo e pressione enter:"<<endl<<endl;
@@ -185,8 +231,9 @@ void Gerenciador::comandos(Grafo* grafo) {
 
             char id_no = get_id_entrada();
             Grafo* arvore_caminhamento_profundidade = grafo->arvore_caminhamento_profundidade(id_no);
-            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
-
+            cout<<endl<<endl;
+            imprimirGrafo(arvore_caminhamento_profundidade);
+            cout<<endl;
             if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
                 cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
             }

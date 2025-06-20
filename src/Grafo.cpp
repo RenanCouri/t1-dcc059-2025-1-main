@@ -86,7 +86,7 @@ bool Grafo::inserirAresta(char id_org,char id_dest,int pesoArst){
             ha_peso_negativo=true;
     }
     lista_adj[posOrg]->arestas.push_back(novaAresta);
-    cout<<"ABA"<<endl;
+    
     if(!in_direcionado){
         Aresta* novaAresta2= new Aresta(id_org); 
         if(in_ponderado_aresta)
@@ -97,6 +97,9 @@ bool Grafo::inserirAresta(char id_org,char id_dest,int pesoArst){
     return true; 
 }
 
+    bool Grafo::inserirArestaRetorno(char id_org,char id_dest,int pesoArst){
+        return false;
+    }
 
 void Grafo::gerarTransposto(){ // Gera grafo transposto para fazer fecho transitivo indireto
     if(!transposto_valido && in_direcionado){
@@ -187,9 +190,52 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
     return nullptr;
 }
 
+void Grafo::buscaProfundidadeNo(Grafo* prof, No* no,bool* visitado,char id_pai){
+    No* novoNo= new No(no->id);
+    novoNo->peso=no->peso;
+    No* novoNoRet= new No(no->id);
+    novoNoRet->peso=no->peso;
+    prof->lista_adj.push_back(novoNo);
+    prof->ordem++;
+    prof->lista_adj_retorno.push_back(novoNoRet);
+    int pos_lista=0;
+    for(Aresta* aresta : no->arestas){
+        pos_lista=posicaoNoNaLista(aresta->id_no_alvo);
+        Aresta* ar= new Aresta(aresta->id_no_alvo);
+        ar->peso=aresta->peso;
+        if(!visitado[pos_lista]){
+            visitado[pos_lista]=true;
+            novoNo->arestas.push_back(ar);
+            buscaProfundidadeNo(prof,lista_adj[pos_lista],visitado,no->id);
+        }
+        else{
+            if(!this->in_direcionado && id_pai==aresta->id_no_alvo){
+                novoNo->arestas.push_back(ar);
+            }
+            else{
+                novoNoRet->arestas.push_back(ar);
+            }
+        }
+    }
+}
+
 Grafo * Grafo::arvore_caminhamento_profundidade(char id_no) {
-    cout<<"Metodo nao implementado"<<endl;
-    return nullptr;
+    int pos_lis=this->posicaoNoNaLista(id_no);
+     Grafo* profundidade= new Grafo(this->in_direcionado,this->in_ponderado_vertice,this->in_ponderado_aresta);
+    if(pos_lis==-1){
+        cout<<"Id inválido passado!!!"<<endl;
+         return nullptr;
+    }
+    
+    bool *visitado= new bool[ordem];
+    for(int i=0;i<ordem;i++)
+        visitado[i]=false;
+    visitado[pos_lis]=true;
+    No* no = lista_adj[pos_lis];
+    buscaProfundidadeNo(profundidade,no,visitado,'\0');    
+    delete [] visitado;
+    return profundidade;
+    
 }
 
 int Grafo::raio() {

@@ -6,10 +6,10 @@ class Aresta {
 public:
     Aresta();
     ~Aresta(){};
-    Aresta(int id_alvo);
+    Aresta(char id_alvo);
     char id_no_alvo;
     int peso;
-    
+    bool retorno;
 };
 
 

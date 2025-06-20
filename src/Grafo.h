@@ -38,13 +38,14 @@ public:
     bool inserirAresta(char id_org,char id_dest,int pesoArst);
     int posicaoNoNaLista(char id);
     void gerarTransposto();
-
+    bool inserirArestaRetorno(char id_org,char id_dest,int pesoArst);
 
     int ordem;
     bool in_direcionado;
     bool in_ponderado_aresta;
     bool in_ponderado_vertice;
     vector<No*> lista_adj;
+    vector<No*> lista_adj_retorno;
 
     //Criei Estes:
     bool ha_peso_negativo;
@@ -55,6 +56,8 @@ public:
 
 private:
     void auxiliarFechos(char id_no,vector<char>& lista_fecho); 
+    void procedimentoBuscaProfundidade(bool* visitado,Grafo* arv_profundidade);
+    void buscaProfundidadeNo(Grafo* prof,No* no,bool*visitado,char id_pai);
 
 };
 
