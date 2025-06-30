@@ -8,6 +8,7 @@ public:
     ~Aresta(){};
     Aresta(char id_alvo);
     char id_no_alvo;
+    int posicao_alvo_lista_adj;
     int peso;
     bool retorno;
 };

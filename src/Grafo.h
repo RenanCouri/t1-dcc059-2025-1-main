@@ -47,6 +47,7 @@ public:
     void gerarTransposto();
     bool inserirArestaRetorno(char id_org,char id_dest,int pesoArst);
     Grafo* subGrafoVerticeInduzido(vector<char> ids_nos);
+    Grafo* subGrafoVerticeInduzidoMelhorado(vector<char> ids_nos);
 
     int ordem;
     bool in_direcionado;
@@ -65,10 +66,12 @@ public:
 private:
     
 
-    void auxiliarFechos(char id_no,vector<char>& lista_fecho); 
+    void auxiliarFechos(int pos_no,vector<char>& lista_fecho); 
     static vector<ArestaCompleta> listaArestasOrdenadas(Grafo* grafo);
-    void buscaProfundidadeNo(Grafo* prof,No* no,bool*visitado,char id_pai);
-
+    void buscaProfundidadeNo(Grafo* prof,No* no,bool* visitado,char id_pai);
+    void buscaProfundidadeVistados( No* no,bool* visitado,char id_pai);
+    void auxiliar_matrizes_floyd(vector<vector<int>>& matriz_distancias,vector<vector<int>>& matriz_precedentes );
+    int excentricidade(vector<int> v);
 };
 
 

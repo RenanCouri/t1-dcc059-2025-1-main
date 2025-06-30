@@ -15,12 +15,12 @@ No* encontrarNo(const vector<No*> listaAdj,char id){
 void lerArquivoGrafo(ifstream& arquivo,Grafo* grafo){
     int bitDir,bitPondVert,bitPondAresta;
 
-    arquivo>>bitDir>>bitPondVert>>bitPondAresta;
+    arquivo>>bitDir>>bitPondAresta>>bitPondVert;
     
     
     
     grafo->in_direcionado=(bitDir!=0);
-    grafo->in_ponderado_aresta=(bitPondVert!=0);
+    grafo->in_ponderado_aresta=(bitPondAresta!=0);
     grafo->in_ponderado_vertice=(bitPondVert!=0);
     int tam=0;
     arquivo>>tam;
