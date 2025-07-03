@@ -596,6 +596,8 @@ int Grafo::excentricidade(vector<int> v){
 
 }
 
+
+
 int Grafo::raio() {
     std::vector<std::vector<int>> matriz_distancias(this->ordem, std::vector<int>(this->ordem));
     std::vector<std::vector<int>> matriz_precedentes(this->ordem, std::vector<int>(this->ordem));
@@ -632,18 +634,123 @@ int Grafo::diametro() {
 }
 
 vector<char> Grafo::centro() {
-    cout<<"Metodo nao implementado"<<endl;
-    return {};
+    std::vector<std::vector<int>> matriz_distancias(this->ordem, std::vector<int>(this->ordem));
+    std::vector<std::vector<int>> matriz_precedentes(this->ordem, std::vector<int>(this->ordem));
+    auxiliar_matrizes_floyd(matriz_distancias,matriz_precedentes);
+    int raio=INF;
+    vector<int> vetor_excentricidades(ordem);
+    int i=0;
+    for(vector<int> distancias : matriz_distancias){
+        
+        vetor_excentricidades[i]=excentricidade(distancias);
+        if(vetor_excentricidades[i]<raio)
+            raio=vetor_excentricidades[i];
+        i++;    
+    }
+    if(raio==INF){
+        cout<<"Gráfico é todo desconexo, não há sequer uma aresta! Passado maior valor do tipo int como raio"<<endl;
+        return {};
+    }    
+    vector<char> centro;
+    for(int i=0;i<ordem;i++){
+        if(vetor_excentricidades[i]==raio)
+            centro.push_back(lista_adj[i]->id);
+    }
+    
+
+
+
+
+    return centro;
 }
 
 vector<char> Grafo::periferia() {
-    cout<<"Metodo nao implementado"<<endl;
-    return {};
+    std::vector<std::vector<int>> matriz_distancias(this->ordem, std::vector<int>(this->ordem));
+    std::vector<std::vector<int>> matriz_precedentes(this->ordem, std::vector<int>(this->ordem));
+    auxiliar_matrizes_floyd(matriz_distancias,matriz_precedentes);
+    int diametro=INT_MIN;
+    vector<int> vetor_excentricidades(ordem);
+    int i=0;
+    for(vector<int> distancias : matriz_distancias){
+        vetor_excentricidades[i]=excentricidade(distancias);
+        if(vetor_excentricidades[i]>diametro && vetor_excentricidades[i]!=INF)
+            diametro=vetor_excentricidades[i];
+    }
+    if(diametro==INT_MIN){
+       cout<<"Gráfico é todo desconexo, não há sequer uma aresta! Passado maior valor do tipo int como diâmetro"<<endl;
+       return {};
+    }
+        
+    vector<char> periferia;
+    for(int i=0;i<ordem;i++){
+        if(vetor_excentricidades[i]==diametro)
+            periferia.push_back(lista_adj[i]->id);
+    }
+    
+
+
+
+
+    return periferia;
+}
+
+void Grafo::buscaProfundidadeVistadosExcludente( No* no,bool* visitado,char id_pai,char id_excluido){
+
+    int pos_lista=0;
+    for(Aresta* aresta : no->arestas){
+        pos_lista=aresta->posicao_alvo_lista_adj;
+        if(aresta->id_no_alvo!=id_excluido && !visitado[pos_lista]){
+            visitado[pos_lista]=true;
+            buscaProfundidadeVistadosExcludente(lista_adj[pos_lista],visitado,no->id,id_excluido);
+        }
+    }
 }
 
 vector<char> Grafo::vertices_de_articulacao() {
-    cout<<"Metodo nao implementado"<<endl;
-    return {};
+    vector<char> v_art;
+    if(ordem==0)
+        return {};
+    if(ordem==1){
+        v_art.push_back(lista_adj[0]->id);
+    }  
+    else{
+        bool *visitados = new bool[ordem];
+        visitados[0]=true;
+        for(int i=1;i<ordem;i++)
+            visitados[i]=false;
+        buscaProfundidadeVistadosExcludente(lista_adj[1],visitados,'\0',lista_adj[0]->id);
+        int k=0;
+        for(;k<ordem;k++){
+            if(k==0) continue;
+            if(!visitados[k]){
+                
+                v_art.push_back(lista_adj[0]->id);
+                break;
+            }  
+            visitados[k]=false;
+        }    
+        for(k=k+1;k<ordem;k++)
+            visitados[k]=false;
+        k=0;    
+        for(int i=1;i<ordem;i++){
+            buscaProfundidadeVistadosExcludente(lista_adj[0],visitados,'\0',lista_adj[i]->id);
+            visitados[i]=true;
+            for(;k<ordem;k++){
+                if(!visitados[k]){
+                
+                     v_art.push_back(lista_adj[i]->id);
+                    break;
+                }  
+                visitados[k]=false;
+            }    
+            for(k=k+1;k<ordem;k++)
+                visitados[k]=false;
+            k=0;
+        }  
+              
+
+    }  
+    return v_art;
 }
 
 

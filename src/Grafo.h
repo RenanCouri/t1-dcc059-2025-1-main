@@ -72,6 +72,7 @@ private:
     void buscaProfundidadeVistados( No* no,bool* visitado,char id_pai);
     void auxiliar_matrizes_floyd(vector<vector<int>>& matriz_distancias,vector<vector<int>>& matriz_precedentes );
     int excentricidade(vector<int> v);
+    void buscaProfundidadeVistadosExcludente( No* no,bool* visitado,char id_pai,char id_excluido);
 };
 
 
