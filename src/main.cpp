@@ -36,7 +36,7 @@ void lerArquivoGrafo(ifstream &arquivo, Grafo *grafo)
             arquivo >> peso;
         if (!grafo->inserirNo(id, peso))
         {
-            cout << "Falaha ao inserir Nó, já estava no grafo!" << endl;
+            cout << "Falha ao inserir Nó, já estava no grafo!" << endl;
         }
     }
     char origem, destino;

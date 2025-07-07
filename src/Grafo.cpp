@@ -2,6 +2,10 @@
 #include <iostream>
 #include <queue>
 #include <set>
+#include <algorithm>
+#include <map>  // Para as distâncias e predecessores no Dijkstra
+
+#define infinito INT_MAX/2 
 
 Grafo::Grafo()
 {
@@ -196,10 +200,125 @@ vector<char> Grafo::fecho_transitivo_indireto(char id_no)
 }
 
 // A partir daqui, ainda devemos implementar:
-vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b)
-{
-    cout << "Metodo nao implementado" << endl;
-    return {};
+vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b) {
+    if (encontrarNo(id_no_a) == NULL || encontrarNo(id_no_b) == NULL) {
+        cout << "Erro: Um dos nos (" << id_no_a << " ou " << id_no_b << ") nao existe no grafo." << endl;
+        return {};
+    }
+    if (this->ha_peso_negativo) {
+        return this->dijkstra_negativo_impl(id_no_a, id_no_b);
+    } else {
+        return this->dijkstra_padrao_impl(id_no_a, id_no_b);
+    }
+}
+
+vector<char> Grafo::dijkstra_padrao_impl(char id_no_a, char id_no_b) {
+    map<char, int> distancias;
+    map<char, char> predecessores;
+    priority_queue<pair<int, char>, vector<pair<int, char>>, greater<pair<int, char>>> pq;
+    set<char> visitados; 
+
+    for (No* no : lista_adj) {
+        distancias[no->id] = infinito;
+        predecessores[no->id] = '\0';
+    }
+
+    distancias[id_no_a] = 0;
+    pq.push({0, id_no_a});
+
+    while (!pq.empty()) {
+        char no_atual_id = pq.top().second;
+        pq.pop();
+
+        if (visitados.count(no_atual_id)) continue;
+        
+        visitados.insert(no_atual_id);
+        if (no_atual_id == id_no_b) break;
+
+        No* no_atual = encontrarNo(no_atual_id);
+        if (!no_atual) continue;
+
+        for (Aresta* aresta : no_atual->arestas) {
+            char vizinho_id = aresta->id_no_alvo;
+            int peso_aresta = in_ponderado_aresta ? aresta->peso : 1;
+            
+            if (distancias[no_atual_id] + peso_aresta < distancias[vizinho_id]) {
+                distancias[vizinho_id] = distancias[no_atual_id] + peso_aresta;
+                predecessores[vizinho_id] = no_atual_id;
+                pq.push({distancias[vizinho_id], vizinho_id});
+            }
+        }
+    }
+    
+    vector<char> caminho;
+    
+    char passo_atual = id_no_b;
+    while (passo_atual != '\0') {
+        caminho.push_back(passo_atual);
+        passo_atual = predecessores[passo_atual];
+    }
+    reverse(caminho.begin(), caminho.end());
+
+    if (caminho.empty() || caminho[0] != id_no_a) {
+         cout << "Nao ha caminho entre " << id_no_a << " e " << id_no_b << "." << endl;
+         return {};
+    }
+    return caminho;
+}
+
+
+vector<char> Grafo::dijkstra_negativo_impl(char id_no_a, char id_no_b) {
+    map<char, int> distancias;
+    map<char, char> predecessores;
+    queue<char> fila_para_processar;
+    set<char> na_fila;
+    
+    for (No* no : lista_adj) {
+        distancias[no->id] = infinito;
+        predecessores[no->id] = '\0';
+    }
+
+    distancias[id_no_a] = 0;
+    fila_para_processar.push(id_no_a);
+    na_fila.insert(id_no_a);
+
+    while (!fila_para_processar.empty()) {
+        char no_atual_id = fila_para_processar.front();
+        fila_para_processar.pop();
+        na_fila.erase(no_atual_id);
+
+        No* no_atual = encontrarNo(no_atual_id);
+        if (!no_atual) continue;
+
+        for (Aresta* aresta : no_atual->arestas) {
+            char vizinho_id = aresta->id_no_alvo;
+            int peso_aresta = in_ponderado_aresta ? aresta->peso : 1;
+
+            if (distancias[no_atual_id] + peso_aresta < distancias[vizinho_id]) {
+                distancias[vizinho_id] = distancias[no_atual_id] + peso_aresta;
+                predecessores[vizinho_id] = no_atual_id;
+                
+                if (na_fila.find(vizinho_id) == na_fila.end()) {
+                    fila_para_processar.push(vizinho_id);
+                    na_fila.insert(vizinho_id);
+                }
+            }
+        }
+    }
+    
+    vector<char> caminho;    
+    char passo_atual = id_no_b;
+    while (passo_atual != '\0') {
+        caminho.push_back(passo_atual);
+        passo_atual = predecessores[passo_atual];
+    }
+    reverse(caminho.begin(), caminho.end());
+    
+    if (caminho.empty() || caminho[0] != id_no_a) {
+         cout << "Nao ha caminho entre " << id_no_a << " e " << id_no_b << "." << endl;
+         return {};
+    }
+    return caminho;
 }
 
 vector<char> Grafo::caminho_minimo_floyd(char id_no, char id_no_b)

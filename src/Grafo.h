@@ -27,7 +27,7 @@ public:
 
     vector<char> fecho_transitivo_direto(char id_no); // a
     vector<char> fecho_transitivo_indireto(char id_no); // b
-    vector<char> caminho_minimo_dijkstra(char id_no_a, char id_no_b); // c
+    vector<char> caminho_minimo_dijkstra(char id_no_a, char id_no_b); // c - foi subdividida
     vector<char> caminho_minimo_floyd(char id_no, char id_no_b); // d
     Grafo* arvore_geradora_minima_prim(vector<char> ids_nos); // e
     Grafo* arvore_geradora_minima_kruskal(vector<char> ids_nos); // f
@@ -39,6 +39,8 @@ public:
     vector<char> vertices_de_articulacao(); // i
 
     // Criei estas:
+    vector<char> dijkstra_padrao_impl(char id_no_a, char id_no_b);
+    vector<char> dijkstra_negativo_impl(char id_no_a, char id_no_b);
     bool ehUmNovoNo(char id);
     No* encontrarNo(char id);
     bool inserirNo(char id, int pesoNo);

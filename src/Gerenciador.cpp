@@ -1,5 +1,7 @@
 #include "Gerenciador.h"
 #include <fstream>
+#include <limits>
+#include <string>
 
 using namespace std;
 
@@ -101,179 +103,198 @@ void Gerenciador::imprimirGrafo(Grafo* grafo){
 }
 
 void Gerenciador::comandos(Grafo* grafo) {
-    cout<<"Digite uma das opcoes abaixo e pressione enter:"<<endl<<endl;
-    cout<<"(a) Fecho transitivo direto de um no;"<<endl;
-    cout<<"(b) Fecho transitivo indireto de um no;"<<endl;
-    cout<<"(c) Caminho minimo (Djikstra);"<<endl;
-    cout<<"(d) Caminho minimo (Floyd);"<<endl;
-    cout<<"(e) Arvore Geradora Minima (Algoritmo de Prim);"<<endl;
-    cout<<"(f) Arvore Geradora Minima (Algoritmo de Kruskal);"<<endl;
-    cout<<"(g) Arvore de caminhamento em profundidade;"<<endl;
-    cout<<"(h) Raio, diametro, centro e periferia do grafo;"<<endl;
-    cout<<"(0) Sair;"<<endl<<endl;
 
-    char resp;
-    cin >> resp;
-    switch (resp) {
-        case 'a': {
+    // trocar a recursão por um loop `while(true)` para evitar o aviso de recursão infinita
+    while(true) {
+        cout<<"Digite uma das opcoes abaixo e pressione enter:"<<endl<<endl;
+        cout<<"(a) Fecho transitivo direto de um no;"<<endl;
+        cout<<"(b) Fecho transitivo indireto de um no;"<<endl;
+        cout<<"(c) Caminho minimo (Djikstra);"<<endl;
+        cout<<"(d) Caminho minimo (Floyd);"<<endl;
+        cout<<"(e) Arvore Geradora Minima (Algoritmo de Prim);"<<endl;
+        cout<<"(f) Arvore Geradora Minima (Algoritmo de Kruskal);"<<endl;
+        cout<<"(g) Arvore de caminhamento em profundidade;"<<endl;
+        cout<<"(h) Raio, diametro, centro e periferia do grafo;"<<endl;
+        cout<<"(0) Sair;"<<endl<<endl;
 
-            char id_no = get_id_entrada();
-            vector<char> fecho_transitivo_direto = grafo->fecho_transitivo_direto(id_no);
-           
-            cout<<endl<<endl<<"Lista em formato de conjunto: "<<endl;
-            imprimirConjuntoChar(fecho_transitivo_direto);
-            cout<<endl<<endl;
-            imprimirGrafoPorIndices(grafo,fecho_transitivo_direto);
-            if(pergunta_imprimir_arquivo("fecho_trans_dir.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl<<endl;
-            }
+        //ler a entrada como string para validar o tamanho
+        string entrada_usuario;
+        cin >> entrada_usuario;
 
+        if (entrada_usuario.length() == 1) {
+            char resp = entrada_usuario[0];
+            switch (resp) {
+                case 'a': {
 
-            break;
-        }
-
-        case 'b':{
-
-            char id_no = get_id_entrada();
-            vector<char> fecho_transitivo_indireto = grafo->fecho_transitivo_indireto(id_no);
-            cout<<endl<<endl<<"Lista em formato de conjunto: "<<endl;
-            imprimirConjuntoChar(fecho_transitivo_indireto);
-            cout<<endl<<endl;
-            imprimirGrafoPorIndices(grafo,fecho_transitivo_indireto);
-            if(pergunta_imprimir_arquivo("fecho_trans_indir.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
-            }
-
-            ;
-            break;
-        }
-
-        case 'c': {
-
-            char id_no_1 = get_id_entrada();
-            char id_no_2 = get_id_entrada();
-            vector<char> caminho_minimo_dijkstra = grafo->caminho_minimo_dijkstra(id_no_1,id_no_2);
-            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
-
-            if(pergunta_imprimir_arquivo("caminho_minimo_dijkstra.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
-            }
+                    char id_no = get_id_entrada();
+                    vector<char> fecho_transitivo_direto = grafo->fecho_transitivo_direto(id_no);
+                
+                    cout<<endl<<endl<<"Lista em formato de conjunto: "<<endl;
+                    imprimirConjuntoChar(fecho_transitivo_direto);
+                    cout<<endl<<endl;
+                    imprimirGrafoPorIndices(grafo,fecho_transitivo_direto);
+                    if(pergunta_imprimir_arquivo("fecho_trans_dir.txt")) {
+                        cout<<"Metodo de impressao em arquivo nao implementado"<<endl<<endl;
+                    }
 
 
-            break;
-        }
-
-        case 'd': {
-
-            char id_no_1 = get_id_entrada();
-            char id_no_2 = get_id_entrada();
-            vector<char> caminho_minimo_floyd = grafo->caminho_minimo_floyd(id_no_1,id_no_2);
-            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
-
-            if(pergunta_imprimir_arquivo("caminho_minimo_floyd.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
-            }
-
-
-            break;
-        }
-        case 'e': {
-
-            int tam;
-            cout<<"Digite o tamanho do subconjunto: ";
-            cin>>tam;
-
-            if(tam > 0 && tam <= grafo->ordem) {
-
-                vector<char> ids = get_conjunto_ids(grafo,tam);
-                Grafo* arvore_geradora_minima_prim = grafo->arvore_geradora_minima_prim(ids);
-                cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
-
-                if(pergunta_imprimir_arquivo("agm_prim.txt")) {
-                    cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
+                    break;
                 }
 
-                delete arvore_geradora_minima_prim;
+                case 'b':{
 
-            }else {
-                cout<<"Valor invalido"<<endl;
-            }
+                    char id_no = get_id_entrada();
+                    vector<char> fecho_transitivo_indireto = grafo->fecho_transitivo_indireto(id_no);
+                    cout<<endl<<endl<<"Lista em formato de conjunto: "<<endl;
+                    imprimirConjuntoChar(fecho_transitivo_indireto);
+                    cout<<endl<<endl;
+                    imprimirGrafoPorIndices(grafo,fecho_transitivo_indireto);
+                    if(pergunta_imprimir_arquivo("fecho_trans_indir.txt")) {
+                        cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
+                    }
 
-            break;
-        }
-
-        case 'f': {
-
-            int tam;
-            cout<<"Digite o tamanho do subconjunto: ";
-            cin>>tam;
-
-            if(tam > 0 && tam <= grafo->ordem) {
-
-                vector<char> ids = get_conjunto_ids(grafo,tam);
-                Grafo* arvore_geradora_minima_kruskal = grafo->arvore_geradora_minima_kruskal(ids);
-                imprimirGrafo(arvore_geradora_minima_kruskal);
-
-                if(pergunta_imprimir_arquivo("agm_kruskal.txt")) {
-                    cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
+                    ;
+                    break;
                 }
 
-                delete arvore_geradora_minima_kruskal;
+                case 'c': {
+                    char id_no_1 = get_id_entrada();
+                    char id_no_2 = get_id_entrada();
 
-            }else {
-                cout<<"Valor invalido"<<endl;
+                    vector<char> caminho_minimo = grafo->caminho_minimo_dijkstra(id_no_1, id_no_2);
+                    if (!caminho_minimo.empty()) {
+                        for (size_t i = 0; i < caminho_minimo.size(); ++i) {
+                            cout << caminho_minimo[i];
+                            if (i < caminho_minimo.size() - 1) {
+                                cout << ",";
+                            }
+                        }
+                        cout << endl << endl;
+                    }
+
+                    if (pergunta_imprimir_arquivo("caminho_minimo.txt")) {
+                        cout << "Metodo de impressao em arquivo nao implementado" << endl;
+                    }
+
+                    break;
+                }
+
+                case 'd': {
+
+                    char id_no_1 = get_id_entrada();
+                    char id_no_2 = get_id_entrada();
+                    vector<char> caminho_minimo_floyd = grafo->caminho_minimo_floyd(id_no_1,id_no_2);
+                    cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
+
+                    if(pergunta_imprimir_arquivo("caminho_minimo_floyd.txt")) {
+                        cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
+                    }
+
+
+                    break;
+                }
+                case 'e': {
+
+                    int tam;
+                    cout<<"Digite o tamanho do subconjunto: ";
+                    cin>>tam;
+
+                    if(tam > 0 && tam <= grafo->ordem) {
+
+                        vector<char> ids = get_conjunto_ids(grafo,tam);
+                        Grafo* arvore_geradora_minima_prim = grafo->arvore_geradora_minima_prim(ids);
+                        cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
+
+                        if(pergunta_imprimir_arquivo("agm_prim.txt")) {
+                            cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
+                        }
+
+                        delete arvore_geradora_minima_prim;
+
+                    }else {
+                        cout<<"Valor invalido"<<endl;
+                    }
+
+                    break;
+                }
+
+                case 'f': {
+
+                    int tam;
+                    cout<<"Digite o tamanho do subconjunto: ";
+                    cin>>tam;
+
+                    if(tam > 0 && tam <= grafo->ordem) {
+
+                        vector<char> ids = get_conjunto_ids(grafo,tam);
+                        Grafo* arvore_geradora_minima_kruskal = grafo->arvore_geradora_minima_kruskal(ids);
+                        imprimirGrafo(arvore_geradora_minima_kruskal);
+
+                        if(pergunta_imprimir_arquivo("agm_kruskal.txt")) {
+                            cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
+                        }
+
+                        delete arvore_geradora_minima_kruskal;
+
+                    }else {
+                        cout<<"Valor invalido"<<endl;
+                    }
+
+                    break;
+                }
+
+                case 'g': {
+
+                    char id_no = get_id_entrada();
+                    Grafo* arvore_caminhamento_profundidade = grafo->arvore_caminhamento_profundidade(id_no);
+                    cout<<endl<<endl;
+                    imprimirGrafo(arvore_caminhamento_profundidade);
+                    cout<<endl;
+                    if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
+                        cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
+                    }
+
+                    delete arvore_caminhamento_profundidade;
+                    break;
+                }
+
+                case 'h': {
+                    vector<char> articulacao = grafo->vertices_de_articulacao();
+                    cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
+
+                    if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
+                        cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
+                    }
+
+                    break;
+                }
+                case 'i': {
+
+                    vector<char> articulacao = grafo->vertices_de_articulacao();
+                    cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
+
+                    if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
+                        cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
+                    }
+
+                    break;
+                }
+
+                case '0': {
+                    cout << "Saindo do programa." << endl;
+                    return; // Retorna da função, encerrando o loop while.
+                }
+                default: {
+                    cout<<"Opção inválida. Por favor, tente novamente."<<endl << endl;
+                }
             }
-
-            break;
         }
-
-        case 'g': {
-
-            char id_no = get_id_entrada();
-            Grafo* arvore_caminhamento_profundidade = grafo->arvore_caminhamento_profundidade(id_no);
-            cout<<endl<<endl;
-            imprimirGrafo(arvore_caminhamento_profundidade);
-            cout<<endl;
-            if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
-            }
-
-            delete arvore_caminhamento_profundidade;
-            break;
+        else {
+            cout << "Opção inválida. Por favor, digite apenas um caractere." << endl << endl;
         }
-
-        case 'h': {
-            vector<char> articulacao = grafo->vertices_de_articulacao();
-            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
-
-            if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
-            }
-
-            break;
-        }
-        case 'i': {
-
-            vector<char> articulacao = grafo->vertices_de_articulacao();
-            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
-
-            if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
-            }
-
-            break;
-        }
-
-        case '0': {
-            exit(0);
-        }
-        default: {
-            cout<<"Opção inválida"<<endl;
-        }
+        //limpa o buffer de entrada para a próxima iteração do loop
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
-
-    comandos(grafo);
-
 }
 
 char Gerenciador::get_id_entrada() {
