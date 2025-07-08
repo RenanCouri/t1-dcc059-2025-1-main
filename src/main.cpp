@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     Grafo* grafo = new Grafo();
     lerArquivoGrafo(arquivo,grafo);
     arquivo.close();
-    Gerenciador::comandos(grafo);
+    Gerenciador::comandos(grafo,nomeArquivo);
     
     delete grafo;
     return 0;
