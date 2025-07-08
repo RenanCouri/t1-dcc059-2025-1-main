@@ -213,8 +213,8 @@ vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b)
     }
     if (!this->in_direcionado)
     {
-        cout << " O grafo não é direcionado, algortimo de caminhamento não se aplica!" << endl;
-        return {};
+        cout << " O grafo não é direcionado, algortimo de caminhamento não se aplica normalmente! Mas aplicar-se-á mesmo assim" << endl;
+
     }
     if (this->ha_peso_negativo)
     {
@@ -413,8 +413,8 @@ vector<char> Grafo::caminho_minimo_floyd(char id_no, char id_no_b)
 {
     if (!this->in_direcionado)
     {
-        cout << "ERRO!!!!! Grafo não direcionado" << endl;
-        return {};
+        cout << " O grafo não é direcionado, algortimo de caminhamento não se aplica normalmente! Mas aplicar-se-á mesmo assim" << endl;
+
     }
     if (!this->in_ponderado_aresta)
     {
@@ -1031,7 +1031,7 @@ vector<char> Grafo::vertices_de_articulacao()
         else
         {
            cout<<"ERRO : Conceito não se aplica claramente a grafos direcionados!"<<endl;
-           v_art={};  
+            
         }
     }
     return v_art;
