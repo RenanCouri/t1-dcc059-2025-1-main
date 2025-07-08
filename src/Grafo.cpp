@@ -1,8 +1,14 @@
 #include "Grafo.h"
 #include <iostream>
 #include <climits>
+#include <queue>
+#include <set>
+#include <algorithm>
+#include <map>  // Para as distâncias e predecessores no Dijkstra
 
 const int INF = INT_MAX;
+
+#define infinito INT_MAX/2 
 
 Grafo::Grafo() {
     in_direcionado=false;
@@ -108,6 +114,7 @@ bool Grafo::inserirAresta(char id_org,char id_dest,int pesoArst){
 
 void Grafo::gerarTransposto(){ // Gera grafo transposto para fazer fecho transitivo indireto
     if(!transposto_valido && in_direcionado){
+        transposto_valido = true;
         if(transposto!=NULL)
             delete transposto;
         transposto = new Grafo(this->in_direcionado,this->in_ponderado_vertice,this->in_ponderado_aresta);
@@ -173,6 +180,134 @@ vector<char> Grafo::fecho_transitivo_indireto(char id_no) {
 }
 
 
+
+
+// A partir daqui, ainda devemos implementar:
+vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b) {
+    if (encontrarNo(id_no_a) == NULL || encontrarNo(id_no_b) == NULL) {
+        cout << "Erro: Um dos nos (" << id_no_a << " ou " << id_no_b << ") nao existe no grafo." << endl;
+        return {};
+    }
+    if(!this->in_direcionado){
+        cout<<" O grafo não é direcionado, algortimo de caminhamento não se aplica!"<<endl;
+        return {};
+    }
+    if (this->ha_peso_negativo) {
+        return this->dijkstra_negativo_impl(id_no_a, id_no_b);
+    } else {
+        return this->dijkstra_padrao_impl(id_no_a, id_no_b);
+    }
+}
+
+vector<char> Grafo::dijkstra_padrao_impl(char id_no_a, char id_no_b) {
+    map<char, int> distancias;
+    map<char, char> predecessores;
+    priority_queue<pair<int, char>, vector<pair<int, char>>, greater<pair<int, char>>> pq;
+    set<char> visitados; 
+
+    for (No* no : lista_adj) {
+        distancias[no->id] = infinito;
+        predecessores[no->id] = '\0';
+    }
+
+    distancias[id_no_a] = 0;
+    pq.push({0, id_no_a});
+
+    while (!pq.empty()) {
+        char no_atual_id = pq.top().second;
+        pq.pop();
+
+        if (visitados.count(no_atual_id)) continue;
+        
+        visitados.insert(no_atual_id);
+        if (no_atual_id == id_no_b) break;
+
+        No* no_atual = encontrarNo(no_atual_id);
+        if (!no_atual) continue;
+
+        for (Aresta* aresta : no_atual->arestas) {
+            char vizinho_id = aresta->id_no_alvo;
+            int peso_aresta = in_ponderado_aresta ? aresta->peso : 1;
+            
+            if (distancias[no_atual_id] + peso_aresta < distancias[vizinho_id]) {
+                distancias[vizinho_id] = distancias[no_atual_id] + peso_aresta;
+                predecessores[vizinho_id] = no_atual_id;
+                pq.push({distancias[vizinho_id], vizinho_id});
+            }
+        }
+    }
+    
+    vector<char> caminho;
+    
+    char passo_atual = id_no_b;
+    while (passo_atual != '\0') {
+        caminho.push_back(passo_atual);
+        passo_atual = predecessores[passo_atual];
+    }
+    reverse(caminho.begin(), caminho.end());
+
+    if (caminho.empty() || caminho[0] != id_no_a) {
+         cout << "Nao ha caminho entre " << id_no_a << " e " << id_no_b << "." << endl;
+         return {};
+    }
+    return caminho;
+}
+
+
+vector<char> Grafo::dijkstra_negativo_impl(char id_no_a, char id_no_b) {
+    map<char, int> distancias;
+    map<char, char> predecessores;
+    queue<char> fila_para_processar;
+    set<char> na_fila;
+    
+    for (No* no : lista_adj) {
+        distancias[no->id] = infinito;
+        predecessores[no->id] = '\0';
+    }
+
+    distancias[id_no_a] = 0;
+    fila_para_processar.push(id_no_a);
+    na_fila.insert(id_no_a);
+
+    while (!fila_para_processar.empty()) {
+        char no_atual_id = fila_para_processar.front();
+        fila_para_processar.pop();
+        na_fila.erase(no_atual_id);
+
+        No* no_atual = encontrarNo(no_atual_id);
+        if (!no_atual) continue;
+
+        for (Aresta* aresta : no_atual->arestas) {
+            char vizinho_id = aresta->id_no_alvo;
+            int peso_aresta = in_ponderado_aresta ? aresta->peso : 1;
+
+            if (distancias[no_atual_id] + peso_aresta < distancias[vizinho_id]) {
+                distancias[vizinho_id] = distancias[no_atual_id] + peso_aresta;
+                predecessores[vizinho_id] = no_atual_id;
+                
+                if (na_fila.find(vizinho_id) == na_fila.end()) {
+                    fila_para_processar.push(vizinho_id);
+                    na_fila.insert(vizinho_id);
+                }
+            }
+        }
+    }
+    
+    vector<char> caminho;    
+    char passo_atual = id_no_b;
+    while (passo_atual != '\0') {
+        caminho.push_back(passo_atual);
+        passo_atual = predecessores[passo_atual];
+    }
+    reverse(caminho.begin(), caminho.end());
+    
+    if (caminho.empty() || caminho[0] != id_no_a) {
+         cout << "Nao ha caminho entre " << id_no_a << " e " << id_no_b << "." << endl;
+         return {};
+    }
+    return caminho;
+}
+
 void Grafo::auxiliar_matrizes_floyd(vector<vector<int>>& matriz_distancias,vector<vector<int>>& matriz_precedentes ){
     for(int i=0;i<ordem;i++){
         for(int j=0;j<ordem;j++){
@@ -226,18 +361,15 @@ void Grafo::auxiliar_matrizes_floyd(vector<vector<int>>& matriz_distancias,vecto
     }
 }
 
-// A partir daqui, ainda devemos implementar:
-vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b) {
-    cout<<"Metodo nao implementado"<<endl;
-    return {};
-}
 
 vector<char> Grafo::caminho_minimo_floyd(char id_no, char id_no_b) {
-    if(!this->in_direcionado || !this->in_ponderado_aresta){
-        cout<<"ERRO!!!!! Grafo não direcionado ou não ponderado nas arestas"<<endl;
+    if(!this->in_direcionado ){
+        cout<<"ERRO!!!!! Grafo não direcionado"<<endl;
         return {};
     }
-
+    if(!this->in_ponderado_aresta){
+        cout<<"AVISO: grafo não ponderado nas arestas. Considera-se peso de cada uma como 1"<<endl;
+    }
     int posA=posicaoNoNaLista(id_no);
     int posB=posicaoNoNaLista(id_no_b);
 
@@ -398,18 +530,59 @@ std::vector<ArestaCompleta> Grafo::listaArestasOrdenadas(Grafo* grafo) {
     return arestasOrdenadas;
 }
 
-Grafo * Grafo::arvore_geradora_minima_prim(vector<char> ids_nos) {
-   return nullptr;
-}   
+Grafo *Grafo::arvore_geradora_minima_prim(vector<char> ids_nos)
+{
+    Grafo *agm = new Grafo(false, in_ponderado_vertice, in_ponderado_aresta);
+    if (ids_nos.empty())
+        return agm;
+
+    priority_queue<pair<int, pair<char, char>>, vector<pair<int, pair<char, char>>>, greater<>> pq;
+    set<char> incluidos;
+
+    // Inicia com o primeiro nó
+    char primeiro = ids_nos[0];
+    incluidos.insert(primeiro);
+    agm->inserirNo(primeiro, encontrarNo(primeiro)->peso);
+
+    // Adiciona arestas do primeiro nó
+    for (Aresta *aresta : encontrarNo(primeiro)->arestas)
+        if (find(ids_nos.begin(), ids_nos.end(), aresta->id_no_alvo) != ids_nos.end())
+            pq.push({aresta->peso, {primeiro, aresta->id_no_alvo}});
+
+    while (!pq.empty())
+    {
+        auto [peso, aresta] = pq.top();
+        pq.pop();
+        char u = aresta.first, v = aresta.second;
+
+        if (incluidos.count(v))
+            continue;
+
+        incluidos.insert(v);
+        agm->inserirNo(v, encontrarNo(v)->peso);
+        agm->inserirAresta(u, v, peso);
+
+        // Adiciona arestas do novo nó
+        for (Aresta *a : encontrarNo(v)->arestas)
+            if (find(ids_nos.begin(), ids_nos.end(), a->id_no_alvo) != ids_nos.end())
+                pq.push({a->peso, {v, a->id_no_alvo}});
+    }
+    return agm;
+}  
 
 Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
     
     
     Grafo * subGrafoVertInd= this->subGrafoVerticeInduzidoMelhorado(ids_nos);
+    if(this->in_direcionado){
+        cout<<"ERRO!!!! Grafo é direcionado, arvores geradoras são para grafos não direcionados!"<<endl;
+        return nullptr;
+    }
     if(subGrafoVertInd->ordem==0){
         cout<<"ERRO!!!!!! Não foi capaz de gerar subGrafo com estes ids"<<endl;
         return nullptr;
     }
+    
     bool *visitado= new bool[subGrafoVertInd->ordem];
     visitado[0]=true;
     for(int i=1;i<subGrafoVertInd->ordem;i++){
@@ -587,7 +760,7 @@ int Grafo::excentricidade(vector<int> v){
         return 0;
     int maior=INT_MIN;
     for(int valor : v){
-        if(valor!=INF && valor>maior)
+        if( valor>maior)
             maior=valor;
     }
     if(maior==INT_MIN)
@@ -610,7 +783,7 @@ int Grafo::raio() {
             raio=exc_atual;
     }
     if(raio==INF)
-        cout<<"Gráfico é todo desconexo, não há sequer uma aresta! Passado maior valor do tipo int como raio"<<endl;
+        cout<<"Gráfo é desconexo, logo raio não se aplica, é infinito!"<<endl;
     return raio;
 }
 
@@ -626,7 +799,7 @@ int Grafo::diametro() {
             diametro=exc_atual;
     }
     if(diametro==INT_MIN){
-       cout<<"Gráfico é todo desconexo, não há sequer uma aresta! Passado maior valor do tipo int como diâmetro"<<endl;
+       cout<<"Gráfo é desconexo, logo diâmetro não se aplica, é infinito!"<<endl;
        diametro=INF;
     }
         
@@ -648,7 +821,7 @@ vector<char> Grafo::centro() {
         i++;    
     }
     if(raio==INF){
-        cout<<"Gráfico é todo desconexo, não há sequer uma aresta! Passado maior valor do tipo int como raio"<<endl;
+        cout<<"Gráfo é desconexo, logo raio não se aplica, é infinito!"<<endl;
         return {};
     }    
     vector<char> centro;
@@ -675,19 +848,20 @@ vector<char> Grafo::periferia() {
         vetor_excentricidades[i]=excentricidade(distancias);
         if(vetor_excentricidades[i]>diametro && vetor_excentricidades[i]!=INF)
             diametro=vetor_excentricidades[i];
+        i++;    
     }
     if(diametro==INT_MIN){
-       cout<<"Gráfico é todo desconexo, não há sequer uma aresta! Passado maior valor do tipo int como diâmetro"<<endl;
+       cout<<"Gráfo é desconexo, logo diâmetro não se aplica, é infinito!"<<endl;
        return {};
     }
-        
+    cout<<diametro;       
     vector<char> periferia;
     for(int i=0;i<ordem;i++){
+        cout<<vetor_excentricidades[i]<<endl;
         if(vetor_excentricidades[i]==diametro)
             periferia.push_back(lista_adj[i]->id);
     }
     
-
 
 
 
@@ -714,43 +888,95 @@ vector<char> Grafo::vertices_de_articulacao() {
         v_art.push_back(lista_adj[0]->id);
     }  
     else{
-        bool *visitados = new bool[ordem];
-        visitados[0]=true;
-        for(int i=1;i<ordem;i++)
-            visitados[i]=false;
-        buscaProfundidadeVistadosExcludente(lista_adj[1],visitados,'\0',lista_adj[0]->id);
-        int k=0;
-        for(;k<ordem;k++){
-            if(k==0) continue;
-            if(!visitados[k]){
-                
-                v_art.push_back(lista_adj[0]->id);
-                break;
-            }  
-            visitados[k]=false;
-        }    
-        for(k=k+1;k<ordem;k++)
-            visitados[k]=false;
-        k=0;    
-        for(int i=1;i<ordem;i++){
-            buscaProfundidadeVistadosExcludente(lista_adj[0],visitados,'\0',lista_adj[i]->id);
-            visitados[i]=true;
-            for(;k<ordem;k++){
-                if(!visitados[k]){
-                
-                     v_art.push_back(lista_adj[i]->id);
-                    break;
+                if(!this->in_direcionado){
+                bool *visitados = new bool[ordem];
+                visitados[0]=true;
+                for(int i=1;i<ordem;i++)
+                    visitados[i]=false;
+                buscaProfundidadeVistadosExcludente(lista_adj[1],visitados,'\0',lista_adj[0]->id);
+                int k=0;
+                for(;k<ordem;k++){
+                    if(k==0) continue;
+                    if(!visitados[k]){
+                        
+                        v_art.push_back(lista_adj[0]->id);
+                        break;
+                    }  
+                    visitados[k]=false;
+                }    
+                for(k=k+1;k<ordem;k++)
+                    visitados[k]=false;
+                k=0;    
+                for(int i=1;i<ordem;i++){
+                    buscaProfundidadeVistadosExcludente(lista_adj[0],visitados,'\0',lista_adj[i]->id);
+                    visitados[i]=true;
+                    for(;k<ordem;k++){
+                        if(!visitados[k]){
+                        
+                            v_art.push_back(lista_adj[i]->id);
+                            break;
+                        }  
+                        visitados[k]=false;
+                    }    
+                    for(k=k+1;k<ordem;k++)
+                        visitados[k]=false;
+                    k=0;
                 }  
-                visitados[k]=false;
-            }    
-            for(k=k+1;k<ordem;k++)
-                visitados[k]=false;
-            k=0;
-        }  
-              
+                    
 
-    }  
-    return v_art;
+            }
+
+            else{
+                this->gerarTransposto();
+                bool *visitados1 = new bool[ordem];
+                bool *visitados2 = new bool[ordem];
+                visitados1[0]=true;
+                visitados2[0]=true;
+                for(int i=1;i<ordem;i++){
+                    visitados1[i]=false;
+                    visitados2[i]=false;
+                }
+                this->buscaProfundidadeVistadosExcludente(lista_adj[1],visitados1,'\0',lista_adj[0]->id);
+                transposto->buscaProfundidadeVistadosExcludente(transposto->lista_adj[1],visitados2,'\0',transposto->lista_adj[0]->id);
+                int k=0;
+                for(;k<ordem;k++){
+                    if(k==0) continue;
+                    if(!visitados1[k] && visitados2[k]){
+                        
+                        v_art.push_back(lista_adj[0]->id);
+                        break;
+                    }  
+                    visitados1[k]=false;
+                    visitados2[k]=false;
+                }    
+                for(k=k+1;k<ordem;k++){
+                    visitados1[k]=false;
+                    visitados2[k]=false;
+                }
+                k=0;    
+                for(int i=1;i<ordem;i++){
+                    buscaProfundidadeVistadosExcludente(lista_adj[0],visitados1,'\0',lista_adj[i]->id);
+                    transposto->buscaProfundidadeVistadosExcludente(transposto->lista_adj[0],visitados2,'\0',transposto->lista_adj[i]->id);
+                    visitados1[i]=true;
+                    visitados2[i]=true;
+                    for(;k<ordem;k++){
+                        if(!visitados1[k] && visitados2[k]){
+                        
+                            v_art.push_back(lista_adj[i]->id);
+                            break;
+                        }  
+                         visitados1[k]=false;
+                    visitados2[k]=false;
+                }    
+                for(k=k+1;k<ordem;k++){
+                    visitados1[k]=false;
+                    visitados2[k]=false;
+                }
+                    k=0;
+                }  
+            }
+}    
+return v_art;
 }
 
 

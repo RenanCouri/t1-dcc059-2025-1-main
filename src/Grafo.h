@@ -39,6 +39,8 @@ public:
     vector<char> vertices_de_articulacao(); // i
 
     // Criei estas:
+    vector<char> dijkstra_padrao_impl(char id_no_a, char id_no_b);
+    vector<char> dijkstra_negativo_impl(char id_no_a, char id_no_b);
     bool ehUmNovoNo(char id);
     No* encontrarNo(char id);
     bool inserirNo(char id, int pesoNo);
@@ -73,6 +75,8 @@ private:
     void auxiliar_matrizes_floyd(vector<vector<int>>& matriz_distancias,vector<vector<int>>& matriz_precedentes );
     int excentricidade(vector<int> v);
     void buscaProfundidadeVistadosExcludente( No* no,bool* visitado,char id_pai,char id_excluido);
+
+    
 };
 
 

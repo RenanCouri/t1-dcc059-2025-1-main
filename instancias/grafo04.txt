@@ -58,3 +58,7 @@ h d 3
 i b 2
 j e 1
 a t 2
+a k 10
+b l 1
+t h -3
+a m 3
