@@ -300,7 +300,7 @@ Grafo *Grafo::arvore_geradora_minima_prim(vector<char> ids_nos)
         if (find(ids_nos.begin(), ids_nos.end(), aresta->id_no_alvo) != ids_nos.end())
             pq.push({aresta->peso, {primeiro, aresta->id_no_alvo}});
 
-    while (!pq.empty())
+    while (!pq.empty() && incluidos.size() < ids_nos.size())
     {
         auto [peso, aresta] = pq.top();
         pq.pop();
@@ -318,6 +318,10 @@ Grafo *Grafo::arvore_geradora_minima_prim(vector<char> ids_nos)
             if (find(ids_nos.begin(), ids_nos.end(), a->id_no_alvo) != ids_nos.end())
                 pq.push({a->peso, {v, a->id_no_alvo}});
     }
+
+    if (incluidos.size() < ids_nos.size())
+        cout << "AVISO: O grafo é desconexo. A AGM não inclui todos os vértices." << endl;
+
     return agm;
 }
 
