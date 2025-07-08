@@ -39,6 +39,8 @@ public:
     vector<char> vertices_de_articulacao(); // i
 
     // Criei estas:
+    vector<char> dijkstra_padrao_impl(char id_no_a, char id_no_b);
+    vector<char> dijkstra_negativo_impl(char id_no_a, char id_no_b);
     bool ehUmNovoNo(char id);
     No* encontrarNo(char id);
     bool inserirNo(char id, int pesoNo);
@@ -47,6 +49,7 @@ public:
     void gerarTransposto();
     bool inserirArestaRetorno(char id_org,char id_dest,int pesoArst);
     Grafo* subGrafoVerticeInduzido(vector<char> ids_nos);
+    Grafo* subGrafoVerticeInduzidoMelhorado(vector<char> ids_nos);
 
     int ordem;
     bool in_direcionado;
@@ -65,10 +68,15 @@ public:
 private:
     
 
-    void auxiliarFechos(char id_no,vector<char>& lista_fecho); 
+    void auxiliarFechos(int pos_no,vector<char>& lista_fecho); 
     static vector<ArestaCompleta> listaArestasOrdenadas(Grafo* grafo);
-    void buscaProfundidadeNo(Grafo* prof,No* no,bool*visitado,char id_pai);
-
+    void buscaProfundidadeNo(Grafo* prof,No* no,bool* visitado,char id_pai);
+    void buscaProfundidadeVistados( No* no,bool* visitado,char id_pai);
+    void auxiliar_matrizes_floyd(vector<vector<int>>& matriz_distancias,vector<vector<int>>& matriz_precedentes );
+    int excentricidade(vector<int> v,int posicao_ignorar);
+    void buscaProfundidadeVistadosExcludente( No* no,bool* visitado,char id_pai,char id_excluido);
+    Grafo* criar_versao_nao_direcionada();
+    
 };
 
 
