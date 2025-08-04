@@ -5,8 +5,6 @@
 #include <set>
 #include <algorithm>
 #include <map> // Para as distâncias e predecessores no Dijkstra
-#include <ctime>   // time
-
 
 const int INF = INT_MAX;
 
@@ -21,7 +19,6 @@ Grafo::Grafo()
     transposto_valido = false;
     transposto = NULL;
     ordem = 0;
-    std::srand(std::time(0)); // inicializa a semente com o tempo atual
 }
 
 Grafo::Grafo(bool direcionado, bool ponderadoVertice, bool ponderadoAresta)
@@ -33,7 +30,6 @@ Grafo::Grafo(bool direcionado, bool ponderadoVertice, bool ponderadoAresta)
     transposto_valido = false;
     transposto = NULL;
     ordem = 0;
-    std::srand(std::time(0)); // inicializa a semente com o tempo atual
 }
 
 Grafo::~Grafo()
