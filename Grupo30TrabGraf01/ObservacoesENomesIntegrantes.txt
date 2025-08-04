@@ -1,9 +1,0 @@
-Emerson Berg Jorge Pereira
-Davi Luís de Faria Rocha
-Renan Andrade Soares Couri
-
-
-Grupo 30   ( Numeração da coluna A do arquivo da planília)
-
-Observações: A pasta de instâncias está fora da src e a de saídas em arquivos está dentro.
-Mas isso já foi tratado no código. Então : "./execGrupo30 nomeDoGrafo" funciona corretamente se estiver DENTRO da src

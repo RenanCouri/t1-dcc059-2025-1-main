@@ -1,0 +1,62 @@
+0 1 1
+20
+a 1
+b 2
+c 3
+d 4
+e 5
+f 6
+g 7
+h 8
+i 9
+j 10
+k 11
+l 12
+m 13
+n 14
+o 15
+p 16
+q 17
+r 18
+s 19
+t 20
+a b 3
+a c 7
+a e 2
+b d 4
+b f 8
+c g 5
+d h 2
+e f 6
+f i 3
+g j 1
+h k 9
+i l 4
+j m 2
+k n 7
+l o 5
+m p 3
+n q 6
+o r 4
+p s 2
+q t 1
+a d 10
+b g 9
+c h 3
+d i 5
+e j 4
+f k 6
+g l 7
+h m 8
+i n 2
+j o 3
+k p 1
+l q 4
+m r 5
+n s 6
+o t 7
+p a 8
+q b 9
+r c 10
+s d 11
+t e 12

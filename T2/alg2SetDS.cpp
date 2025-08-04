@@ -1,11 +1,11 @@
-#include "../src/Grafo.h"
+#include "./Grafo.h"
 #include <cstdlib> // rand, srand
 #include <ctime>   // time
 #include <cmath>
 
 using namespace std;
 
-vector<char> Grafo::independenteMin2_guloso()
+vector<char> Grafo::dominanteMin2_guloso()
 {
     vector<NoLA2 *> listaAdj2;
     int cont = 0;
@@ -117,48 +117,37 @@ void Grafo::buscaProfundidadeNivelK(No *no, bool *visitado, char id_pai, int niv
     }
 }
 
-vector<char> Grafo::independenteMin2_gulosoAdaptRand(double alpha, int repeticoes)
+vector<char> Grafo::dominanteMin2_gulosoAdaptRand(double alpha, int repeticoes)
 {
-    return auxiliar_indM2_adaptRand(alpha,repeticoes);
+    return auxiliar_domM_dist2_adaptRand(alpha,repeticoes);
 }
 
-vector<char> Grafo::independenteMin2_gulosoAdaptRandReat(vector<double> alphas,int repeticoes,int reps_para_recal,double exp_sens)
+vector<char> Grafo::dominanteMin2_gulosoAdaptRandReat(vector<double> alphas,int repeticoes,int reps_para_recal,double exp_sens)
 {
     double prob_ini=1/alphas.size();
     vector<double> probabilidades(alphas.size(),prob_ini);
     vector<double> medias(alphas.size(),0);
-    return auxiliar_indM2_adaptRandReat(alphas,probabilidades,medias,repeticoes,reps_para_recal,exp_sens);
+    return auxiliar_domM_dist2_adaptRandReat(alphas,probabilidades,medias,repeticoes,reps_para_recal,exp_sens);
 }
 
 
 
-vector<char> Grafo::auxiliar_indM2_adaptRand(double alpha, int repeticoes)
+vector<char> Grafo::auxiliar_domM_dist2_adaptRand(double alpha, int repeticoes)
 {
     
-
-    vector<NoLA2 *> listaAdj2;
+   
+    vector<NoLA2 *> listaAdj2(lista_adj.size());
+  
     int N=lista_adj.size();
     vector<int> primOrig(N), secOrig(N);
+   
     inicializaListaAlgGul(listaAdj2,primOrig,secOrig);
-    
+  
     vector<char> solucao_final;
-
+   
     for (int reps_exec = 0; reps_exec < repeticoes; reps_exec++)
     {
         execucao_alg_guloso_rand_adap(alpha, listaAdj2,primOrig,secOrig, solucao_final, reps_exec == 0);
-    }
-
-    int total_a_desalocar_nos=listaAdj2.size();
-    for(int i=0;i<total_a_desalocar_nos;i++){
-        int total_a_desalocar_arestas= listaAdj2[i]->arestasPrim.size();
-        for(int j=0; j< total_a_desalocar_arestas;j++){
-            delete listaAdj2[i]->arestasPrim[j];
-        }
-        total_a_desalocar_arestas= listaAdj2[i]->arestasSec.size();
-        for(int j=0; j< total_a_desalocar_arestas;j++){
-            delete listaAdj2[i]->arestasSec[j];
-        }
-        delete listaAdj2[i];
     }
 
     int total_a_desalocar_nos=listaAdj2.size();
@@ -179,7 +168,7 @@ vector<char> Grafo::auxiliar_indM2_adaptRand(double alpha, int repeticoes)
     return solucao_final;
 }
 
-vector<char> Grafo::auxiliar_indM2_adaptRandReat(vector<double> alphas, vector<double> probabilidades, vector<double> medias, int repeticoes, int reps_para_recal, double exp_sens)
+vector<char> Grafo::auxiliar_domM_dist2_adaptRandReat(vector<double> alphas, vector<double> probabilidades, vector<double> medias, int repeticoes, int reps_para_recal, double exp_sens)
 {
    
 
@@ -325,10 +314,10 @@ int Grafo::execucao_alg_guloso_rand_adap(float alpha, vector<NoLA2 *> &listaAdj2
 
     int tam_atual = candidatos.size();
 
-    std::sort(candidatos.begin(), candidatos.end(), [](NoLA2 noA, NoLA2 noB)
-              {
-                  return (noA.cobertosTotal > noB.cobertosTotal) || (noA.cobertosTotal == noB.cobertosTotal && noA.cobertosPrim > noB.cobertosPrim); // ordena em ordem decrescente
-              });
+    std::sort(candidatos.begin()+contador_passos, candidatos.end(), [](NoLA2* noA, NoLA2* noB)
+                  {
+                      return (noA->cobertosTotal > noB->cobertosTotal) || (noA->cobertosTotal == noB->cobertosTotal && noA->cobertosPrim > noB->cobertosPrim); // ordena em ordem decrescente
+                  });
     auto iterador = candidatos.begin();
 
 

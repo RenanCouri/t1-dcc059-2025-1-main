@@ -18,6 +18,31 @@ struct ArestaCompleta {
     int peso;
 };
 
+struct NoLA2 {
+    char id;
+    int posLista;
+    int peso;
+    vector<Aresta*> arestasPrim;
+    vector<Aresta*> arestasSec; 
+    int cobertosTotal=1;
+    int cobertosPrim=1;
+    int cobertosSec=0;
+    bool cobre_a_si=true;
+    bool na_solucao=false;
+
+    void alteraCobertPrim(int alt){
+        cobertosPrim+=alt;
+        cobertosTotal+=alt;
+    }
+    void alteraCobertSec(int alt){
+        cobertosSec+=alt;
+        cobertosTotal+=alt;
+    }
+    void alteraCobertTotal(int alt){
+        alteraCobertPrim(alt);
+    }
+};
+
 class Grafo {
 public:
     Grafo();
@@ -64,6 +89,14 @@ public:
     bool transposto_valido=false;
     Grafo* transposto;
 
+    //T2
+    vector<char> dominanteMin2_guloso();
+    vector<char> dominanteMin2_gulosoAdaptRand(double alphas, int repeticoes);
+    vector<char> dominanteMin2_gulosoAdaptRandReat(vector<double> alphas,int repeticoes,int reps_para_recal,double exp_sens);
+
+    vector<char> auxiliar_domM_dist2_adaptRand(double alpha,int repeticoes);
+    vector<char> auxiliar_domM_dist2_adaptRandReat(vector<double> alphas,vector<double> probabilidades,vector<double> medias,int repeticoes, int reps_para_recal,double exp_sens);
+
 
 private:
     
@@ -76,6 +109,22 @@ private:
     int excentricidade(vector<int> v,int posicao_ignorar);
     void buscaProfundidadeVistadosExcludente( No* no,bool* visitado,char id_pai,char id_excluido);
     Grafo* criar_versao_nao_direcionada();
+
+    void buscaProfundidadeNivelK(No *no, bool *visitado,char id_pai,int nivel_k, vector<Aresta*> &k_arestas);
+
+    //T2
+
+    void inicializacao_reativo(vector<NoLA2*> &listaAdj2,const vector<int> &primOrig, const vector<int> &secOrig,
+        vector<double> &alphas,vector<double> &probabilidades,vector<double> &medias,
+        int repeticoes_ini,double exp_sens,vector<char> &solucao_otima,vector<long long> &somas_soluces_alphas,vector<int> &execucoes_alphas);
+
+    int sorteia_indice_alpha(vector<double> &probabilidades);
+    void recalcula_probabilidades(vector<double> &probabilidades,int f_sol_otm, vector<double> &medias,double exp_sens);
+
+
+    void inicializaListaAlgGul(vector<NoLA2*> &listaAdj2, vector<int> &primOrg, vector<int> &secOrg);
+    int execucao_alg_guloso_rand_adap(float alpha,vector<NoLA2*> &listaAdj2,const vector<int> &primOrig, const vector<int> &secOrig, vector<char> &solucao_otima, bool primeira_iter);
+
     
 };
 
