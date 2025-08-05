@@ -18,10 +18,11 @@ vector<char> Grafo::dominanteMin2_guloso()
         novoNo->posLista = cont;
         novoNo->id = no->id;
         novoNo->peso = no->peso;
+        visitado[cont]=true;
         buscaProfundidadeNivelK(no, visitado, no->id, 1, novoNo->arestasPrim);
         buscaProfundidadeNivelK(no, visitado, no->id, 2, novoNo->arestasSec);
         novoNo->cobertosPrim = novoNo->arestasPrim.size() + 1;
-        novoNo->cobertosSec = novoNo->arestasSec.size() + 1;
+        novoNo->cobertosSec = novoNo->arestasSec.size();
         novoNo->cobertosTotal = novoNo->cobertosPrim + novoNo->cobertosSec;
         for (int i = 0; i < ordem; i++)
             visitado[i] = false;
@@ -52,7 +53,7 @@ vector<char> Grafo::dominanteMin2_guloso()
             cobertos_atual++;
         for (Aresta *a : atual->arestasPrim)
         {
-            if (listaAdj2[a->posicao_alvo_lista_adj]->cobre_a_si || !listaAdj2[a->posicao_alvo_lista_adj]->na_solucao)
+            if (listaAdj2[a->posicao_alvo_lista_adj]->cobre_a_si && !listaAdj2[a->posicao_alvo_lista_adj]->na_solucao)
             {
                 cobertos_atual++;
                 listaAdj2[a->posicao_alvo_lista_adj]->cobre_a_si = false;
@@ -60,7 +61,7 @@ vector<char> Grafo::dominanteMin2_guloso()
         }
         for (Aresta *a : atual->arestasSec)
         {
-            if (listaAdj2[a->posicao_alvo_lista_adj]->cobre_a_si || !listaAdj2[a->posicao_alvo_lista_adj]->na_solucao)
+            if (listaAdj2[a->posicao_alvo_lista_adj]->cobre_a_si && !listaAdj2[a->posicao_alvo_lista_adj]->na_solucao)
             {
                 cobertos_atual++;
                 listaAdj2[a->posicao_alvo_lista_adj]->cobre_a_si = false;
@@ -73,6 +74,7 @@ vector<char> Grafo::dominanteMin2_guloso()
             solucao.push_back(atual->id);
         }
         contador_passos++;
+        cout<<cobertos_atual<<endl;
     }
     
     int total_a_desalocar_nos=listaAdj2.size();
@@ -99,21 +101,24 @@ void Grafo::buscaProfundidadeNivelK(No *no, bool *visitado, char id_pai, int niv
     {
         pos_lista = aresta->posicao_alvo_lista_adj;
 
-        if (!visitado[pos_lista])
-        {
-            visitado[pos_lista] = true;
+        
+            
             if (nivel_k < 0)
                 return;
             if (nivel_k == 0)
             {
-                Aresta *ar = new Aresta(aresta->id_no_alvo);
-                ar->peso = aresta->peso;
-                ar->posicao_alvo_lista_adj = pos_lista;
-                k_arestas.push_back(ar);
+                if (!visitado[pos_lista])
+                {
+                    visitado[pos_lista] = true;
+                    Aresta *ar = new Aresta(aresta->id_no_alvo);
+                    ar->peso = aresta->peso;
+                    ar->posicao_alvo_lista_adj = pos_lista;
+                    k_arestas.push_back(ar);
+                }
             }
             else
                 buscaProfundidadeNivelK(lista_adj[pos_lista], visitado, no->id, nivel_k, k_arestas);
-        }
+        
     }
 }
 
@@ -140,9 +145,12 @@ vector<char> Grafo::auxiliar_domM_dist2_adaptRand(double alpha, int repeticoes)
   
     int N=lista_adj.size();
     vector<int> primOrig(N), secOrig(N);
-   
+    
     inicializaListaAlgGul(listaAdj2,primOrig,secOrig);
-  
+    
+   
+
+
     vector<char> solucao_final;
    
     for (int reps_exec = 0; reps_exec < repeticoes; reps_exec++)
@@ -286,11 +294,12 @@ void Grafo::inicializaListaAlgGul(vector<NoLA2*> &listaAdj2, vector<int> &primOr
         novoNo->posLista = cont;
         novoNo->id = no->id;
         novoNo->peso = no->peso;
+        visitado[cont]=true;
         buscaProfundidadeNivelK(no, visitado, no->id, 1, novoNo->arestasPrim);
         buscaProfundidadeNivelK(no, visitado, no->id, 2, novoNo->arestasSec);
         novoNo->cobertosPrim = novoNo->arestasPrim.size() + 1;
         primOrig[cont]=novoNo->cobertosPrim;
-        novoNo->cobertosSec = novoNo->arestasSec.size() + 1;
+        novoNo->cobertosSec = novoNo->arestasSec.size();
         secOrig[cont]=novoNo->cobertosSec;
         novoNo->cobertosTotal = novoNo->cobertosPrim + novoNo->cobertosSec;
         for (int i = 0; i < ordem; i++)
@@ -330,7 +339,7 @@ int Grafo::execucao_alg_guloso_rand_adap(float alpha, vector<NoLA2 *> &listaAdj2
             cobertos_atual++;
         for (Aresta *a : atual->arestasPrim)
         {
-            if (listaAdj2[a->posicao_alvo_lista_adj]->cobre_a_si || !listaAdj2[a->posicao_alvo_lista_adj]->na_solucao)
+            if (listaAdj2[a->posicao_alvo_lista_adj]->cobre_a_si  && !listaAdj2[a->posicao_alvo_lista_adj]->na_solucao)
             {
                 cobertos_atual++;
                 listaAdj2[a->posicao_alvo_lista_adj]->cobre_a_si = false;
@@ -348,7 +357,7 @@ int Grafo::execucao_alg_guloso_rand_adap(float alpha, vector<NoLA2 *> &listaAdj2
         }
         for (Aresta *a : atual->arestasSec)
         {
-            if (listaAdj2[a->posicao_alvo_lista_adj]->cobre_a_si || !listaAdj2[a->posicao_alvo_lista_adj]->na_solucao)
+            if (listaAdj2[a->posicao_alvo_lista_adj]->cobre_a_si  && !listaAdj2[a->posicao_alvo_lista_adj]->na_solucao)
             {
                 cobertos_atual++;
                 listaAdj2[a->posicao_alvo_lista_adj]->cobre_a_si = false;
@@ -377,7 +386,7 @@ int Grafo::execucao_alg_guloso_rand_adap(float alpha, vector<NoLA2 *> &listaAdj2
         iterador++;
         std::sort(candidatos.begin()+contador_passos, candidatos.end(), [](NoLA2* noA, NoLA2* noB)
                   {
-                      return (noA->cobertosTotal > noB->cobertosTotal) || (noA->cobertosTotal == noB->cobertosTotal && noA->cobertosPrim > noB->cobertosPrim); // ordena em ordem decrescente
+                      return (noA->cobertosTotal > noB->cobertosTotal)  || (noA->cobertosTotal == noB->cobertosTotal && noA->cobertosPrim > noB->cobertosPrim) ; // ordena em ordem decrescente
                   });
 
         if (num_cobertos >= this->ordem)
