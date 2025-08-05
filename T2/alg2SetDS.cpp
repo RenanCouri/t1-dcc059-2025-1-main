@@ -74,7 +74,7 @@ vector<char> Grafo::dominanteMin2_guloso()
             solucao.push_back(atual->id);
         }
         contador_passos++;
-        cout<<cobertos_atual<<endl;
+        
     }
     
     int total_a_desalocar_nos=listaAdj2.size();
