@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <iomanip>
 #include "./Grafo.h"
 
 using namespace std;
@@ -33,18 +34,18 @@ void lerArquivoGrafo(ifstream &arquivo, Grafo *grafo)
     {
 
         arquivo >> id;
-        cout << id << endl;
+        //cout << id << endl;
         if (grafo->in_ponderado_vertice)
             arquivo >> peso;
         if (!grafo->inserirNo(id, peso))
         {
-            cout << "Falaha ao inserir Nó, já estava no grafo!" << endl;
+            cout << "Falha ao inserir Nó, já estava no grafo!" << endl;
         }
     }
     char origem, destino;
     while (arquivo >> origem >> destino)
     {
-        cout << origem << " " << destino << endl;
+        //cout << origem << " " << destino << endl;
         if (grafo->in_ponderado_aresta)
             arquivo >> peso;
         if (!grafo->inserirAresta(origem, destino, peso))
@@ -71,136 +72,176 @@ void lerArquivoGrafo(ifstream &arquivo, Grafo *grafo)
     }
             */
     }
-    cout << "saiu" << endl;
+    //cout << "saiu" << endl;
 }
 
-int main(int argc, char *argv[])
+int main()
 {
-
-    if (argc < 2)
-    {
-        cerr << "Erro: nome do arquivo não fornecido.\n";
-        cerr << "Uso correto: " << argv[0] << " <nome_do_arquivo>\n";
-        return 1;
-    }
-    string nomeArquivo = argv[1];
-    string caminhoCompleto = "../instancias/" + nomeArquivo;
-    ifstream arquivo(caminhoCompleto);
-    if (!arquivo.is_open())
-    {
-        cerr << "Erro: não foi possível abrir o arquivo '" << argv[1] << "'\n";
+    const string listaPath = "../instancias/instances.txt"; //acessa as instâncias fornecidas
+    ifstream lista(listaPath);
+    if (!lista.is_open()) {
+        cerr << "Erro: não foi possível abrir o arquivo de lista '" << listaPath << "'\n";
         return 1;
     }
 
-    cout << argv[1] << endl;
+    // Parâmetros dos experimentos
+    const int runs = 10; // 10 execuções por instância/algoritmo
+    const vector<double> alphas = {0.1, 0.25, 0.45}; // 3 valores de alfa
+    const int reps_adapRand = 30;   // >=30 por execução do randomizado adaptativo
+    const int reps_reat = 300;      // >=300 por execução do reativo
+    const int reps_troca = 30;      // bloco de 30 
 
-    cout << "Arquivo '" << caminhoCompleto << "' aberto com sucesso!\n";
-    Grafo *grafo = new Grafo();
-    lerArquivoGrafo(arquivo, grafo);
+    string nomeArquivo;
+    while (getline(lista, nomeArquivo)) { //roda para cada instância de instances.txt
+        if (nomeArquivo.empty()) continue;
 
-    cout << "Escolha o algoritmo: " << endl;
-    bool continuar = true;
-    vector<char> solucao;
+        const string caminhoCompleto = "../instancias/" + nomeArquivo;
+        cout << "\n========================================\n";
+        cout << "Instância: " << nomeArquivo << "\n"; //nome da instância
 
-    vector<double> alphas = {0.05, 0.1, 0.15, 0.3, 0.5};
-    vector<vector<char>> solucoes_adapt_rand(alphas.size());
-    int reps_adapRand = 500;
-
-    double exp_sens = 3;
-    int reps_reat = 1000;
-    int reps_troca = 30;
-
-    while (continuar)
-    {
-
-        cout << "(a) Guloso \n(b) Guloso Randomizado adaptativo \n(c) Guloso Randomizado Adaptativo Reativo\n (qualquer outro caractere) sair" << endl;
-        char opcao = 0;
-        cin >> opcao;
-
-        high_resolution_clock::time_point inicio, fim;
-        nanoseconds tempo_execucao;
-
-        switch (opcao)
+        // ---------- Algoritmo (a) Guloso ----------
         {
-        case 'a':
-        {
-            inicio = high_resolution_clock::now();
-            solucao = grafo->dominanteMin2_guloso();
-            fim = high_resolution_clock::now();
-            tempo_execucao = duration_cast<nanoseconds>(fim - inicio);
-            cout << "Tempo de execução (Guloso): " << tempo_execucao.count() << " ns" << endl;
-            break;
-        }
-        case 'b':
-        {
-            inicio = high_resolution_clock::now();
-            for (int i = 0; i < alphas.size(); i++)
-            {
-                solucoes_adapt_rand[i] = grafo->dominanteMin2_gulosoAdaptRand(alphas[i], reps_adapRand);
+            cout << "\n[A] Guloso - " << runs << " execuções\n";
+            long long best_size = LLONG_MAX; //guarda o menor tamanho encontrado
+            //iniciado com LLONG_MAX para que a primeira solução entre.
+            double sum_sizes = 0.0; // acumula tamanhos para depois tirar a média
+            long long sum_time_us = 0; //acumula o tempo em microssegundos para depois tirar a média.
+
+            for (int r = 0; r < runs; r++) {
+                ifstream arquivo(caminhoCompleto);
+                if (!arquivo.is_open()) {
+                    cerr << "Erro: não foi possível abrir '" << caminhoCompleto << "'\n";
+                    break;
+                }
+
+                Grafo* grafo = new Grafo();
+                lerArquivoGrafo(arquivo, grafo); //cria o grafo para esta instância
+                arquivo.close();
+
+                auto t0 = high_resolution_clock::now(); //inicia a contagem de tempo
+                vector<char> sol = grafo->dominanteMin2_guloso();
+                auto t1 = high_resolution_clock::now();
+
+                long long dur_us = duration_cast<microseconds>(t1 - t0).count(); //duração
+                int sz = (int)sol.size(); //tamanho da solução
+
+                best_size = min<long long>(best_size, sz); //guarda o menor size visto até agora
+                sum_sizes += sz;
+                sum_time_us += dur_us;
+
+                delete grafo;
             }
-            fim = high_resolution_clock::now();
-            tempo_execucao = duration_cast<nanoseconds>(fim - inicio);
-            cout << "Tempo de execução (Guloso Randomizado Adaptativo): " << tempo_execucao.count() << " ns" << endl;
-            break;
-        }
-        case 'c':
-        {
-            inicio = high_resolution_clock::now();
-            solucao = grafo->dominanteMin2_gulosoAdaptRandReat(alphas, reps_reat, reps_troca, exp_sens);
-            fim = high_resolution_clock::now();
-            tempo_execucao = duration_cast<nanoseconds>(fim - inicio);
-            cout << "Tempo de execução (Guloso Randomizado Adaptativo Reativo): " << tempo_execucao.count() << " ns" << endl;
-            break;
-        }
-        default:
-        {
-            continuar = false;
-            break;
-        }
+
+            double mean_size = sum_sizes / runs; //calcula o tamanho médio
+            double mean_time_us = (double)sum_time_us / runs; //calcula o tempo médio
+
+            cout << "Melhor (menor) tamanho: " << best_size << "\n";
+            cout << "Tamanho médio: " << fixed << setprecision(2) << mean_size << "\n";
+            cout << "Tempo médio: " << (long long)mean_time_us << " µs"
+                 << " (" << setprecision(6) << mean_time_us/1e6 << " s)\n";
         }
 
-        if (continuar)
+        // ---------- Algoritmo (b) Guloso Randomizado Adaptativo ----------
         {
-            if (opcao == 'b')
-            {
-                int cont = 0;
-                for (vector<char> sol : solucoes_adapt_rand)
-                {
-                    cout << "alpha: " << alphas[cont] << endl;
-                    cout << "Tamanho da solução: " << sol.size() << endl;
-                    cout << "elementos da solução:{";
-                    for (int i = 0; i < sol.size(); i++)
-                    {
-                        cout << sol[i];
-                        if (i != sol.size() - 1)
-                            cout << ", ";
+            cout << "\n[B] Guloso Randomizado Adaptativo - " << runs << " execuções por alfa\n";
+            for (size_t ai = 0; ai < alphas.size(); ai++) {
+                double alpha = alphas[ai]; //seleciona um valor de alfa
+                long long best_size = LLONG_MAX;
+                double sum_sizes = 0.0;
+                long long sum_time_us = 0;
+
+                for (int r = 0; r < runs; r++) { //'runs' repetições para cada alfa
+                    ifstream arquivo(caminhoCompleto);
+                    if (!arquivo.is_open()) {
+                        cerr << "Erro: não foi possível abrir '" << caminhoCompleto << "'\n";
+                        break;
                     }
-                    cout << "}" << endl;
-                    cont++;
+
+                    Grafo* grafo = new Grafo();
+                    lerArquivoGrafo(arquivo, grafo);
+                    arquivo.close();
+
+                    auto t0 = high_resolution_clock::now();
+                    // reps_adapRand garante chamar o construtivo >=30 vezes
+                    vector<char> sol = grafo->dominanteMin2_gulosoAdaptRand(alpha, reps_adapRand);
+                    auto t1 = high_resolution_clock::now();
+
+                    long long dur_us = duration_cast<microseconds>(t1 - t0).count();
+                    int sz = (int)sol.size();
+
+                    best_size = min<long long>(best_size, sz);
+                    sum_sizes += sz;
+                    sum_time_us += dur_us;
+
+                    delete grafo;
                 }
+
+                double mean_size = sum_sizes / runs;
+                double mean_time_us = (double)sum_time_us / runs;
+
+                cout << "\n alpha = " << fixed << setprecision(2) << alpha << "\n";
+                cout << "  Melhor (menor) tamanho: " << best_size << "\n";
+                cout << "  Tamanho médio: " << fixed << setprecision(2) << mean_size << "\n";
+                cout << "  Tempo médio: " << (long long)mean_time_us << " µs"
+                     << " (" << setprecision(6) << mean_time_us/1e6 << " s)\n";
             }
-            else
-            {
-                cout << "Tamanho da solução: " << solucao.size() << endl;
-                cout << "elementos da solução:{";
-                for (int i = 0; i < solucao.size(); i++)
-                {
-                    cout << solucao[i];
-                    if (i != solucao.size() - 1)
-                        cout << ", ";
+        }
+
+        // ---------- Algoritmo (c) Guloso Randomizado Adaptativo Reativo ----------
+        {
+            cout << "\n[C] Guloso Randomizado Adaptativo Reativo - " << runs << " execuções\n";
+            long long best_size = LLONG_MAX;
+            double sum_sizes = 0.0;
+            long long sum_time_us = 0;
+
+            for (int r = 0; r < runs; r++) {
+                ifstream arquivo(caminhoCompleto);
+                if (!arquivo.is_open()) {
+                    cerr << "Erro: não foi possível abrir '" << caminhoCompleto << "'\n";
+                    break;
                 }
-                cout << "}" << endl;
+
+                Grafo* grafo = new Grafo();
+                lerArquivoGrafo(arquivo, grafo);
+                arquivo.close();
+
+                auto t0 = high_resolution_clock::now();
+                // reps_reat = 300, reps_troca = 30 (blocos de 30)
+                vector<char> sol = grafo->dominanteMin2_gulosoAdaptRandReat(alphas, reps_reat, reps_troca, /*exp_sens=*/3.0);
+                auto t1 = high_resolution_clock::now();
+
+                long long dur_us = duration_cast<microseconds>(t1 - t0).count();
+                int sz = (int)sol.size();
+
+                best_size = min<long long>(best_size, sz);
+                sum_sizes += sz;
+                sum_time_us += dur_us;
+
+                delete grafo;
             }
-            cout << endl
-                 << endl
-                 << endl;
+
+            double mean_size = sum_sizes / runs;
+            double mean_time_us = (double)sum_time_us / runs;
+
+            cout << "Melhor (menor) tamanho: " << best_size << "\n";
+            cout << "Tamanho médio: " << fixed << setprecision(2) << mean_size << "\n";
+            cout << "Tempo médio: " << (long long)mean_time_us << " µs"
+                 << " (" << setprecision(6) << mean_time_us/1e6 << " s)\n";
+        }
+
+        cout << "========================================\n";
+
+        // aguarda decisão do usuário: digite 'q' ou 'Q' para encerrar, qualquer outra tecla para continuar
+        cout << "\nDigite 'q' (ou 'Q') e Enter para encerrar, ou qualquer outra tecla e Enter para continuar para a próxima instância: ";
+        string resp;
+        getline(cin, resp); // usa getline para ler a linha inteira
+
+        if (!resp.empty() && (resp[0] == 'q' || resp[0] == 'Q')) {
+            cout << "\nEncerrando conforme solicitado pelo usuário.\n";
+            break;
         }
     }
 
-    vector<char> solucaoAlgAtual = grafo->dominanteMin2_guloso();
-
-    arquivo.close();
-
-    delete grafo;
+    lista.close();
     return 0;
 }
